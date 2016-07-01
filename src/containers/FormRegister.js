@@ -38,7 +38,6 @@ class FormRegister extends React.Component {
       email: '',
       password: '',
       password2: ''
-
     };
   }
 
