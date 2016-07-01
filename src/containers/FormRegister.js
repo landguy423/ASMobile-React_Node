@@ -40,7 +40,6 @@ class FormRegister extends React.Component {
       password2: ''
     };
   }
-
   updateDimensions() {
     let w = window;
     let d = document;
