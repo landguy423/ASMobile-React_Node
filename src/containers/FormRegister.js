@@ -82,7 +82,6 @@ class FormRegister extends React.Component {
     if (this.state.password.length < 3 && this.state.password2.length < 3) {
       messageAlert += 'Passwords are a minimum of 3 characters.';
     }
-
     if (!this.state.complete) {
       messageAlert += 'You do not accept the agreement.';
     }
