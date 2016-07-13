@@ -49,7 +49,7 @@ class FormRegister extends React.Component {
     let height = w.innerHeight || documentElement.clientHeight || body.clientHeight;
 
     this.setState({width, height});
-    console.log(this.state);
+    console.log(this.state); 
   }
   handleChange(event) {
     this.setState({complete: event.target.checked});
