@@ -11,6 +11,7 @@ export let addConversation = (data) => ({
   ...data
 });
 
+
 export let addConversationWithId = (data, id) => {
   console.log('data, id ', data, id);
   data.id = id;
@@ -38,7 +39,6 @@ const conversation = (state = initialState, action = {}) => {
       return state;
   }
 };
-
 export default (state = {}, action = {}) => {
   switch (action.type) {
     case TYPE.ADD_CONVERSATION_WITH_ID:
@@ -55,3 +55,4 @@ export default (state = {}, action = {}) => {
       return state;
   }
 };
+

@@ -4,7 +4,6 @@
  */
 
 var config = {
-
   APP_PORT: process.env.APP_PORT || 8080,
   APP_HOST: process.env.APP_HOST || '0.0.0.0',
   SRV_NAME: process.env.SRV_NAME || 'reactweb',

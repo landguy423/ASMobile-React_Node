@@ -12,6 +12,7 @@ const TYPE = {
   LOGIN_FACEBOOK_FAILED: 'LOGIN_FACEBOOK_FAILED'
 };
 
+
 export const registerFBUser = (user) => {
   return dispatch => {
     let userAuth;

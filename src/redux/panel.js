@@ -5,11 +5,6 @@ const TYPE = {
   // SWIPEABLE_PANEL: 'SWIPEABLE_PANEL'
 };
 
-// export let setSwipeablePanel = (isSwipeable) => ({
-//   type: TYPE.SWIPEABLE_PANEL,
-//   isSwipeable
-// });
-
 export let setOpenPanel = (isOpen) => ({
   type: TYPE.ACTIVE_PANEL,
   isOpen

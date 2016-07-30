@@ -19,6 +19,7 @@ export let pushModal = (nameModal) => ({
   nameModal
 });
 
+
 export let changeToolbarType = (toolbarType) => ({
   type: TYPE.CHANGE_TOOLBARTYPE,
   toolbarType
@@ -55,7 +56,7 @@ let initialState = {
   toolbarType: 'main',
   previousShowPage: null,
   previousNamePage: null,
-  previousToolbarType: 'main'
+  previousToolbarType: 'main',
 };
 
 let signupFlag = window.localStorage.getItem('signupFlag');
@@ -83,6 +84,7 @@ window.history.replaceState(initialState, initialState.namePage, '#' + initialSt
 
 export default (_state = initialState, action = {}) => {
   let state = {..._state};
+
   switch (action.type) {
     case TYPE.HISTORY_STATE:
       return action.state;
@@ -148,3 +150,4 @@ export default (_state = initialState, action = {}) => {
       return state;
   }
 };
+

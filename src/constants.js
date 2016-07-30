@@ -1,4 +1,3 @@
-
 module.exports = {
   TABLET_WIDTH: 600,
   DESKTOP_WIDTH: 1000,

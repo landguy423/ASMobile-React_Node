@@ -66,7 +66,6 @@ class FormRegister extends React.Component {
   }
   handleClick() {
     let messageAlert = '';
-
     let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     if (this.state.fname === '' || this.state.lname === '' || this.state.username === '' || this.state.email === '' || this.state.password === '' || this.state.password2 === '') {
       messageAlert = 'Not all fields are filled.';
