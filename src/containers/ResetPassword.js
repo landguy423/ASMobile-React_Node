@@ -14,6 +14,7 @@ import { getAuth } from '../redux/auth/authSelectors';
 import ResetPasswordComponent from '../components/ResetPasswordComponent';
 
 class ResetPassword extends Component {
+  
   pushToLoginPage = () => {
     this.props.pushPage(true, 'LOGIN');
     this.props.changeToolbarType('main');
