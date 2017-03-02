@@ -13,6 +13,7 @@ import {
 } from 'react-onsenui';
 
 
+
 // import MainPageLogin from '../components/MainPageLogin';
 import DefaultPage1 from '../components/DefaultPage1';
 const navBarLogo = require('../resources/asc-logos.png');
