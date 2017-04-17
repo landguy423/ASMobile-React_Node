@@ -8,6 +8,8 @@ import {
 import MainPage from './MainPage';
 import hockeyAppUtils from '../utils/hockeyAppUtils';
 
+var config = require('../config');
+
 @connect((state) => ({ ...state }), (dispatch) => ({ actions: bindActionCreators({...navigatorActions}, dispatch) }))
 
 class App extends React.Component {
@@ -24,9 +26,10 @@ class App extends React.Component {
     event.stopImmediatePropagation();
     window.history.back();
   }
+
   onDeviceReady() {
     console.log('onDeviceReady--> App');
-    hockeyAppUtils.hockeyAppInit('4751548682934be99b9a92b2b46dd134').then(result => {
+    hockeyAppUtils.hockeyAppInit(config.HOCKEY_APPID).then(result => {
       console.log('hockeyAppInit: ' + result);
     }, error => {
       console.log('hockeyAppInit: ' + error);

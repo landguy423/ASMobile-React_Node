@@ -10,7 +10,10 @@ var config = {
   SRV_NAME: process.env.SRV_NAME || 'reactweb',
   NODE_ENV: process.env.NODE_ENV || 'development',
   GOOGLEMAPS_SECRET: process.env.GOOGLEMAPS_SECRET || 'AIzaSyA-iIocu6_YpUIyVpvxCY5Q6OAOjo22PiQ',
-  API_HOST: process.env.API_HOST || 'local', // values for src/api/hystrix.js. local --> 0.0.0.0, web --> kubernetes dns names, app --> api.actionsportscommunity.com
+
+  HOCKEY_APPID: process.env.HOCKEY_APPID || 'b46f703dfc4048fa80833b9c29445cac',
+  API_HOST: process.env.API_HOST || 'local', // values for hystrix: local --> 0.0.0.0, web --> kubernetes dns names, app --> api.actionsportscommunity.com
+
   JWT_SECRET: process.env.JWT_SECRET || 'ASC-SECRET',
   JWT_DURATION: (process.env.JWT_DURATION || 10 * 24 * 60 * 60) * 1000 // seconds
 };

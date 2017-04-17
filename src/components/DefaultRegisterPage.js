@@ -1,12 +1,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import * as navigatorActions from '../redux/navigator';
-import * as panelActions from '../redux/panel';
-import * as authActions from '../redux/auth';
-import * as registerActions from '../redux/register';
-// import { registerUser } from '../api/User';
-import Faker from 'faker';
+
+import {
+  pushPage
+} from '../redux/navigator';
+
+import { registerUser } from '../redux/auth/authActions';
+import { addRegisterData } from '../redux/register';
+import { getAuth } from '../redux/auth/authSelectors';
+
 import {
     Input,
     AlertDialog,
@@ -16,13 +18,25 @@ import {
 
 import LoginButton from './ButtonFB';
 
-@connect((state) => ({ navigator: state.navigator, panel: state.panel, auth: state.auth, register: state.register }),
-      (dispatch) => ({ actions: bindActionCreators({...navigatorActions, ...panelActions, ...authActions, ...registerActions}, dispatch) }))
+const mapStateToProps = state => {
+  return ({
+    navigator: state.navigator,
+    panel: state.panel,
+    auth: getAuth(state),
+    register: state.register
+  });
+};
+
+const mapDispatchToProps = dispatch => ({
+  pushPage: (showPage, namePage) => dispatch(pushPage(showPage, namePage)),
+  registerUser: user => dispatch(registerUser.request(user)),
+  addRegisterData: (data, status) => dispatch(addRegisterData(data, status))
+});
 
 class DefaultRegisterPage extends React.Component {
   constructor(props) {
     super(props);
-    this.pushPage = this.pushPage.bind(this);
+    this.createUser = this.createUser.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleAlertDialogCancel = this.handleAlertDialogCancel.bind(this);
     this.handleAlertDialogOk = this.handleAlertDialogOk.bind(this);
@@ -31,24 +45,33 @@ class DefaultRegisterPage extends React.Component {
     this.state = {
       isOpenModel: false,
       acception: false,
-      // width: null,
-      // height: null,
+      width: null,
       contentAlert: '',
       firstName: '',
       lastName: '',
-      // username: '',
       email: '',
       password: '',
       password2: ''};
   }
-  componentWillMount() {
 
-      this.setState({
-          firstName: Faker.name.firstName(),
-          lastName: Faker.name.lastName(),
-          email: Faker.internet.email(),
-      });
+  componentWillReceiveProps(nextProps) {
+    const {register} = nextProps;
+    const {userAuthData, token} = nextProps.auth;
+
+    if (userAuthData && token) {
+      if (!register.status) {
+        this.props.addRegisterData({
+          firstName: this.state.firstName,
+          lastName: this.state.lastName,
+          email: this.state.email,
+          password: this.state.password
+        }, true);
+
+        nextProps.pushPage(true, 'ContinueRegister');
+      }
+    }
   }
+
   handleChange(event) {
     this.setState({acception: event.target.checked});
   }
@@ -84,40 +107,21 @@ class DefaultRegisterPage extends React.Component {
       messageAlert += 'You do not accept the agreement.';
     }
     if (messageAlert === 'Everything is fine') {
-      const regInfo = window.localStorage.getItem('regInfo');
-      // registerUser({email: this.state.email, password: this.state.password, firstName: this.state.firstName, lastName: this.state.lastName, regInfo})
-      // .then(registerResponse => {
-      //   this.props.actions.addAuth({
-      //     email: registerResponse.userAuth.email,
-      //     identityID: registerResponse.userAuth._id,
-      //     profile: registerResponse.userProfile
-      //   });
-      //   this.props.actions.addToken(registerResponse.token);
-      //   // step to next page
-      //   window.localStorage.removeItem('regInfo');
-      //   this.pushPage();
-      // }).catch(error => {
-      //   error.success = false;
-      //   // UI msg about error
-      //   console.log('ACHTUNG OUTER', error);
-      // });
-        this.pushPage();
+      this.createUser();
     } else {
       this.setState({contentAlert: messageAlert, isOpenModel: true});
     }
   }
 
-  pushPage() {
-    // this.props.navigator.pushPage({component: SignIn, props: {key: 'SignIn'}});
-    // this.props.actions.switchAuth(true);
-    // this.props.actions.addRegisterData(this.state);
-    this.props.actions.addRegisterData({
-      firstName: this.state.firstName,
-      lastName: this.state.lastName,
-      email: this.state.email,
-      password: this.state.password,
+  createUser() {
+    const { email, password, firstName, lastName } = this.state;
+
+    this.props.registerUser({
+      email,
+      password,
+      firstName,
+      lastName
     });
-    this.props.actions.pushPage(true, 'ContinueRegister');
   }
 
   render() {
@@ -199,17 +203,6 @@ class DefaultRegisterPage extends React.Component {
                         </div>
                         <div className='wrap__inline__seporator__col'></div>
                         <div className='wrap__inline__input'>
-                            {
-                              //  <Input
-                              //  style={{width: '100%'}}
-                              //  modifier='material'
-                              //  value={this.state.username}
-                              //  onChange={(event) => { this.setState({username: event.target.value}); } }
-                              //  placeholder='Username'
-                              //  />
-
-                            // <div className='wrap__inline__seporator__row'></div>
-                            }
                             <Input
                                 style={{width: '100%'}}
                                 modifier='material'
@@ -282,4 +275,4 @@ class DefaultRegisterPage extends React.Component {
   }
 }
 
-export default DefaultRegisterPage;
+export default connect(mapStateToProps, mapDispatchToProps)(DefaultRegisterPage);

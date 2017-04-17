@@ -103,6 +103,7 @@ class Home extends React.Component {
                                   text='SIGN UP'
                                   onClick={() => {
                                     console.log('Button click SIGN UP');
+                                    window.localStorage.setItem('signupFlag', true);
                                     this.props.actions.pushPage(true, 'Register');
                                     this.props.actions.changeToolbarType('back');
                                   } } />
@@ -110,6 +111,7 @@ class Home extends React.Component {
                                   text='LOG IN'
                                   onClick={() => {
                                     console.log('Button click LOG IN');
+                                    window.localStorage.setItem('signupFlag', false);
                                     this.props.actions.pushPage(true, 'LOGIN');
                                     this.props.actions.changeToolbarType('back');
                                   } } />

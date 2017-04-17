@@ -1,0 +1,38 @@
+@media screen and (min-width: 0px) and (max-width: 600px) {
+  .login-form{
+    text-align: center;
+    width: 90%;
+    margin: 30px auto 0;
+  }
+}
+@media screen and (min-width: 601px) and (max-width: 1000px) {
+  .login-form{
+    text-align: center;
+    width: 60%;
+    margin: 30px auto 0;
+  }
+}
+@media screen and (min-width: 1001px) {
+  .login-form{
+    text-align: center;
+    width: 40%;
+    margin: 30px auto 0;
+  }
+}
+
+.title__reg__text {
+  font-size: 18px;
+}
+
+.profile__input__child {
+  margin: 13px 14px 0px 13px;
+}
+
+.profile__input__wide {
+  width: 100%;
+}
+
+.login-button {
+  width: 100%;
+  margin: 0 auto;
+}

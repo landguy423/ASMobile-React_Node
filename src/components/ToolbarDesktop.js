@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as navigatorActions from '../redux/navigator';
 import * as panelActions from '../redux/panel';
-import * as authActions from '../redux/auth';
+import * as authActions from '../redux/auth/authActions';
 import * as utilityActions from '../redux/utility';
 import {
   Toolbar,
@@ -53,7 +53,7 @@ class CustomToolbar extends React.Component {
                 {
                   this.props.auth.isLogin
                   ? <div style={{display: 'flex', justifyContent: 'flex-end', flexDirection: 'row', alignItems: 'center', fontSize: '14px', lineHeight: '20px', fontWeight: 600}} >
-                      <div style={{marginLeft: '7px', cursor: 'pointer'}} onClick={() => { console.log('LOG OUT'); this.props.actions.switchAuth(false); this.props.actions.pushPage(false, 'HOME'); }}>LOG OUT </div>
+                      <div style={{marginLeft: '7px', cursor: 'pointer'}} onClick={() => { console.log('LOG OUT'); this.props.actions.logOut(); this.props.actions.pushPage(false, 'HOME'); }}>LOG OUT </div>
                       <Dialog
                         isOpen={!!this.state.isOpenDialogUnderConstruction}
                         isCancelable={false}
@@ -182,7 +182,7 @@ class CustomToolbar extends React.Component {
                 {
                   this.props.auth.isLogin
                   ? <div style={{display: 'flex', justifyContent: 'flex-end', flexDirection: 'row', alignItems: 'center', fontSize: '14px', lineHeight: '20px', fontWeight: 600}} >
-                      <div style={{marginLeft: '7px', cursor: 'pointer'}} onClick={() => { console.log('LOG OUT'); this.props.actions.switchAuth(false); this.props.actions.pushPage(false, 'HOME'); }}>LOG OUT </div>
+                      <div style={{marginLeft: '7px', cursor: 'pointer'}} onClick={() => { console.log('LOG OUT'); this.props.actions.logOut(); this.props.actions.pushPage(false, 'HOME'); }}>LOG OUT </div>
                       <Dialog
                         isOpen={!!this.state.isOpenDialogUnderConstruction}
                         isCancelable={false}
@@ -272,7 +272,16 @@ class CustomToolbar extends React.Component {
                 <div style={{display: 'flex', justifyContent: 'flex-end', flexDirection: 'row', alignItems: 'center', fontSize: '14px', lineHeight: '20px', fontWeight: 600}} >
                   <div style={{marginLeft: '7px', cursor: 'pointer'}} onClick={() => { console.log('SIGN UP'); this.props.actions.pushPage(true, 'Register'); }}>SIGN UP </div>
                   <div style={{marginLeft: '7px', width: '2px', height: '14px', backgroundColor: '#ccc'}}></div>
-                  <div style={{marginLeft: '7px', cursor: 'pointer'}} onClick={() => { console.log('LOG IN'); this.props.actions.switchAuth(true); }}>LOG IN </div>
+                  <div
+                    style={{marginLeft: '7px', cursor: 'pointer'}}
+                    onClick={() => {
+                      console.log('LOG IN');
+                      // switchAuth is deprecated
+                      // this.props.actions.switchAuth(true);
+                    }}
+                  >
+                    LOG IN
+                  </div>
                   <Dialog
                     isOpen={!!this.state.isOpenDialogUnderConstruction}
                     isCancelable={false}

@@ -1,0 +1,65 @@
+{
+  "name": "cucumber-boilerplate",
+  "version": "1.1.0",
+  "description": "Boilerplate project to run WebdriverIO tests with Cucumber",
+  "homepage": "https://github.com/webdriverio/cucumber-boilerplate",
+  "main": "test/runner.js",
+  "scripts": {
+    "clean": "read -p \"Are you sure you want to clean the project? [y/n] \" -n 1 -r; if [[ $REPLY =~ ^[Yy]$ ]]; then sudo rm -R .git .github demo-app test .travis.yml jest.json wdio.BUILD.conf.js src/features/**; fi",
+    "start-web": "http-server ./demo-app -s",
+    "start-app": "./node_modules/.bin/appium --default-capabilities '{\"launchTimeout\": 720000}'",
+    "test": "npm run test:unit && npm run test:features",
+    "test:features": "npm run-script local-webserver & (wdio wdio.BUILD.conf.js; wdio_ret=$?; kill $(lsof -t -i:8080); exit $wdio_ret)",
+    "test:unit": "source ./test.env & jest --config=jest.json",
+    "test:ios": "./node_modules/.bin/cucumber.js --compiler=js:babel-register --require src/steps/ src/features/ios/*.feature ",
+    "test:android": "",
+    "test:web": "./node_modules/.bin/wdio",
+    "test:registration": "./node_modules/.bin/wdio --suite registration",
+    "test:navigation": "./node_modules/.bin/wdio --suite navigation",
+    "test:contact": "./node_modules/.bin/wdio --suite contact",
+    "test:login": "./node_modules/.bin/wdio --suite login"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webdriverio/cucumber-boilerplate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/webdriverio/cucumber-boilerplate/issues"
+  },
+  "keywords": [
+    "webdriverio",
+    "cucumber",
+    "test",
+    "selenium"
+  ],
+  "author": "Christian Bromann <christian@saucelabs.com>",
+  "license": "MIT",
+  "dependencies": {
+    "babel-preset-es2015": "~6.18.0",
+    "babel-register": "~6.18.0",
+    "chai": "~3.5.0",
+    "cucumber": "^1.3.1",
+    "sendgrid": "^4.7.1",
+    "wdio-cucumber-framework": "^0.2.15",
+    "wdio-phantomjs-service": "~0.2.2",
+    "wdio-selenium-standalone-service": "0.0.7",
+    "wdio-spec-reporter": "~0.0.5",
+    "webdriverio": "^4.6.2"
+  },
+  "devDependencies": {
+    "appium": "^1.6.3",
+    "babel-core": "^6.23.1",
+    "babel-jest": "~18.0.0",
+    "babel-polyfill": "~6.20.0",
+    "chai-as-promised": "^6.0.0",
+    "dotenv": "^4.0.0",
+    "fibers": "^1.0.15",
+    "http-server": "~0.9.0",
+    "jest": "~18.1.0",
+    "loadtest": "^2.2.1",
+    "safe": "^0.4.3",
+    "wd": "^1.1.3",
+    "wdio": "^0.3.3",
+    "wdio-junit-reporter": "^0.2.0"
+  }
+}

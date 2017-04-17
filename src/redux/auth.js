@@ -1,84 +1,127 @@
-import _ from 'lodash';
+// import _ from 'lodash';
+import * as API from '../api/api';
 
 const TYPE = {
-  SWITCH_AUTH: 'SWITCH_AUTH',
   ADD_FACEBOOK_TOKEN: 'ADD_FACEBOOK_TOKEN',
-  ADD_TOKEN: 'ADD_TOKEN',
-  ADD_DATA: 'ADD_DATA',
-  ADD_DATA_CONTINUE: 'ADD_DATA_CONTINUE',
-  ADD_DATAFACEBOOK: 'ADD_DATAFACEBOOK'
+  ADD_DATAFACEBOOK: 'ADD_DATAFACEBOOK',
+  REGISTER_FACEBOOK_REQUESTED: 'REGISTER_FACEBOOK_REQUESTED',
+  REGISTER_FACEBOOK_SUCCESS: 'REGISTER_FACEBOOK_SUCCESS',
+  REGISTER_FACEBOOK_FAILED: 'REGISTER_FACEBOOK_FAILED',
+  LOGIN_FACEBOOK_REQUESTED: 'LOGIN_FACEBOOK_REQUESTED',
+  LOGIN_FACEBOOK_SUCCESS: 'LOGIN_FACEBOOK_SUCCESS',
+  LOGIN_FACEBOOK_FAILED: 'LOGIN_FACEBOOK_FAILED'
 };
 
-export let switchAuth = (isLogin) => ({
-  type: TYPE.SWITCH_AUTH,
-  isLogin
-});
+export const registerFBUser = (user) => {
+  return dispatch => {
+    let userAuth;
+    let token;
+    let params;
+    let url = '';
 
-export let addAuthFacebook = (fbAuthData) => ({
-  type: TYPE.ADD_DATAFACEBOOK,
-  fbAuthData
-});
+    params = {
+      facebookAccessToken: user.facebookAccessToken
+    };
 
-export let addAuth = (userAuthData) => ({
-  type: TYPE.ADD_DATA,
-  userAuthData
-});
+    return dispatch({
+      types: [TYPE.REGISTER_FACEBOOK_REQUESTED, TYPE.REGISTER_FACEBOOK_SUCCESS, TYPE.REGISTER_FACEBOOK_FAILED],
+      promise: API.post(url, params, 'AUTH', false)
+        .then(response => {
+          userAuth = response;
+          // console.log('FACEBOOK_response', response);
+          url = '/login/basic';
 
-export let addAuthContinue = (userAuthData) => ({
-  type: TYPE.ADD_DATA_CONTINUE,
-  userAuthData
-});
+          params = {
+            facebookAccessToken: user.facebookAccessToken
+          };
+          return API.post(url, params, 'AUTH', false);
+        })
+        .then(tokenResponse => {
+          token = tokenResponse;
 
-export let addFacebookToken = (fbToken) => ({
-  type: TYPE.ADD_FACEBOOK_TOKEN,
-  fbToken
-});
+          window.localStorage.setItem('token', token);
+          url = '';
+          params = {
+            identityID: userAuth._id,
+            culture: user.regInfo ? user.regInfo : ''
+          };
+          return API.post(url, params, 'USER', true);
+        })
+        .then(profileResponse => {
+          return ({ token, userAuth, userProfile: profileResponse, success: true });
+        })
+    });
+  };
+};
 
-export let addToken = (token) => ({
-  type: TYPE.ADD_TOKEN,
-  token
-});
+export const loginFBUser = (fbToken) => {
+  return dispatch => {
+    let url = '/login/facebook';
+    let params = {facebookAccessToken: fbToken};
+
+    return dispatch({
+      types: [TYPE.LOGIN_FACEBOOK_REQUESTED, TYPE.LOGIN_FACEBOOK_SUCCESS, TYPE.LOGIN_FACEBOOK_FAILED],
+      promise: API.post(url, params, 'AUTH', false)
+        .then((response) => {
+          return ({ response });
+        })
+    });
+  };
+};
 
 const initialState = {
   isLogin: false,
   fbToken: null,
   token: null,
   fbAuthData: null,
-  userAuthData: null
+  userAuthData: null,
+  userProfile: null,
+  error: null
 };
 
 export default (_state = initialState, action = {}) => {
   let state = {..._state};
   switch (action.type) {
-    case TYPE.SWITCH_AUTH:
-      return {
-        ...state,
-        isLogin: action.isLogin
-      };
-    case TYPE.ADD_DATAFACEBOOK:
-      return {
-        ...state,
-        fbAuthData: action.fbAuthData
-      };
-    case TYPE.ADD_DATA:
-      return {
-        ...state,
-        userAuthData: action.userAuthData
-      };
-    case TYPE.ADD_DATA_CONTINUE:
-      return {
-        ...state,
-        userAuthData: _.merge(state.userAuthData, action.userAuthData)
-      };
     case TYPE.ADD_FACEBOOK_TOKEN:
       return {
         ...state,
         fbToken: action.fbToken
       };
-    case TYPE.ADD_TOKEN:
+    case TYPE.REGISTER_FACEBOOK_REQUESTED:
       return {
         ...state,
-        token: action.token
+        token: null,
+        error: null
+      };
+    case TYPE.REGISTER_FACEBOOK_SUCCESS:
+      let registerFBResponse = action.result;
+      return {
+        ...state,
+        userAuthData: {
+          email: registerFBResponse.userAuth.email,
+          identityID: registerFBResponse.userAuth._id,
+          profile: registerFBResponse.userProfile
+        },
+        token: registerFBResponse.token
+      };
+    case TYPE.REGISTER_FACEBOOK_FAILED:
+      return {
+        ...state,
+        error: action.error.response.data
+      };
+    case TYPE.LOGIN_FACEBOOK_REQUESTED:
+      return {
+        ...state,
+        error: null
+      };
+    case TYPE.LOGIN_FACEBOOK_SUCCESS:
+      return {
+        ...state
+      };
+    case TYPE.LOGIN_FACEBOOK_FAILED:
+      return {
+        ...state,
+        error: action.error.response.data
       };
     default:
       return state;

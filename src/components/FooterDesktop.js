@@ -3,14 +3,13 @@ import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import * as navigatorActions from '../redux/navigator';
 import * as panelActions from '../redux/panel';
-import * as authActions from '../redux/auth';
 
 import {
     // Input
 } from 'react-onsenui';
 import staticImage from '../staticImages';
 
-@connect((state) => ({ navigator: state.navigator, panel: state.panel, auth: state.auth, utility: state.utility }), (dispatch) => ({ actions: bindActionCreators({...navigatorActions, ...panelActions, ...authActions}, dispatch) }))
+@connect((state) => ({ navigator: state.navigator, panel: state.panel, auth: state.auth, utility: state.utility }), (dispatch) => ({ actions: bindActionCreators({...navigatorActions, ...panelActions}, dispatch) }))
 
 class FooterDesktop extends React.Component {
   constructor(props) {
@@ -28,7 +27,7 @@ class FooterDesktop extends React.Component {
 
   render() {
     return (
-      <div style={{width: '100%', backgroundColor: '#252525', display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+      <div id='footer' style={{width: '100%', backgroundColor: '#252525', display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
 
         <div style={{height: '100%', display: 'flex', justifyContent: 'space-between', flexDirection: 'row', alignItems: 'center', paddingTop: '30px', paddingBottom: '50px'}}>
           <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', fontWeight: 600, paddingLeft: '70px', paddingRight: '5px'}} >

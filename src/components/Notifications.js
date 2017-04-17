@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as navigatorActions from '../redux/navigator';
 import * as panelActions from '../redux/panel';
-import * as authActions from '../redux/auth';
 
 import Select from 'react-select';
 import SplitterButton from './Button';
@@ -19,7 +18,7 @@ import {
 } from 'react-onsenui';
 
 @connect((state) => ({ navigator: state.navigator, panel: state.panel, auth: state.auth, utility: state.utility }),
-    (dispatch) => ({ actions: bindActionCreators({...navigatorActions, ...panelActions, ...authActions}, dispatch) }))
+    (dispatch) => ({ actions: bindActionCreators({...navigatorActions, ...panelActions}, dispatch) }))
 
 class Notifications extends React.Component {
   constructor(props) {

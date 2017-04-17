@@ -1,5 +1,9 @@
 import React from 'react';
 import commonUtils from '../utils/commonUtils';
+import { connect } from 'react-redux';
+
+import { getProfile, updateProfile } from '../redux/auth/authActions';
+import { getAuth } from '../redux/auth/authSelectors';
 
 import {
     Icon,
@@ -12,6 +16,7 @@ import {
 
 import Select from 'react-select';
 import DatePicker from 'react-datepicker';
+import moment from 'moment';
 import {countries} from 'country-data';
 
 import '../css/react-select.css';
@@ -25,6 +30,17 @@ import zipcoder from '../utils/zipcoder';
 
 import constants from '../constants';
 import staticImage from '../staticImages';
+
+const mapStateToProps = state => ({
+  auth: getAuth(state)
+});
+
+const mapDispatchToProps = dispatch => ({
+  getProfile: email => dispatch(getProfile.request(email)),
+  updateProfile: data => dispatch(updateProfile.request(data))
+});
+
+@connect(mapStateToProps, mapDispatchToProps)
 
 class Profile extends React.Component {
   constructor(props) {
@@ -45,6 +61,7 @@ class Profile extends React.Component {
     this.enableButton = this.enableButton.bind(this);
     this.onloadImg = this.onloadImg.bind(this);
     this.state = {
+      profileID: '',
       countries: null,
       showBlock: false,
       canSubmit: false,
@@ -52,11 +69,11 @@ class Profile extends React.Component {
         'Male',
         'Female'
       ],
-      selectedSexType: 'Female',
-      lastname: '',
-      firstname: '',
+      gender: 'Female',
+      lastName: '',
+      firstName: '',
       username: '',
-      email: '',
+      publicEmail: '',
       /*
       mb validate ?
       validateEmail(email) {
@@ -65,21 +82,21 @@ class Profile extends React.Component {
       }
       */
       image: staticImage.profileImage,
-      dateBirth: null,
+      birthDay: null,
       about: '',
-      fbProfile: '',
-      twProfile: '',
+      Facebook: '',
+      Twitter: '',
       address: '',
       newPswd: '',
       confirmPswd: '',
-      stateVal: '',
-      countryVal: '',
-      spiritualBeliefVal: '',
+      state: '',
+      country: '',
+      spiritualBelief: '',
       currentSportVal: null,
       currentAbilityLevelVal: null,
       currentSportList: [],
       city: '',
-      zipVal: '',
+      zip: '',
       isZip: false,
       isZipShow: false
     };
@@ -95,30 +112,57 @@ class Profile extends React.Component {
     let countriesList = countries.all.map(function(key, index) { return { label: key.name, value: key.name.replace(/\s*/g, '') }; });
     self.setState({ countries: countriesList });
     zipcoder.location(function(data) {
-      self.setState({ zipVal: data ? data.zipcode : '', city: data ? data.city : '', isZipShow: true });
+      self.setState({ zip: data ? data.zipcode : '', city: data ? data.city : '', isZipShow: true });
     });
+
+    const {userProfile} = this.props.auth;
+    if (userProfile) {
+      const email = userProfile.publicEmail;
+      // save current user email
+
+      this.setState({publicEmail: email});
+      this.props.getProfile(email);
+    }
+  }
+  componentWillReceiveProps(nextProps) {
+    const { userProfile } = nextProps.auth;
+    if (userProfile) {
+      if (userProfile.gender === 'female') {
+        userProfile.gender = 'Female';
+      }
+      if (userProfile.gender === 'male') {
+        userProfile.gender = 'Male';
+      }
+      this.setState({
+        ...userProfile,
+        profileID: userProfile._id,
+        currentSportList: userProfile.skills,
+        birthDay: moment(userProfile.birthday)
+      });
+    }
   }
   handleSexChange(sex) {
-    this.setState({selectedSexType: sex});
+    this.setState({gender: sex});
   }
   handleChange(e) {
     this.setState({[e.currentTarget.id]: e.currentTarget.value});
   }
   handleDatebirthChange(e) {
-    this.setState({dateBirth: e});
+    this.setState({birthDay: e});
   }
   handleStateChange(val) {
-    this.setState({stateVal: val});
+    this.setState({state: val});
   }
   handleCountryChange(val) {
+    console.log('COUNTRY', val);
     if (this.in_array(val ? val.value : null, ['Canada', 'USA'])) {
-      this.setState({countryVal: val, showBlock: true});
+      this.setState({country: val.value, showBlock: true});
     } else {
-      this.setState({countryVal: val, showBlock: false});
+      this.setState({country: val.value, showBlock: false});
     }
   }
   handleZipChange(e) {
-    this.setState({zipVal: e.target.value, isZip: i18nZipcodes(window.navigator.language.substr(0, 2), e.target.value)});
+    this.setState({zip: e.target.value, isZip: i18nZipcodes(window.navigator.language.substr(0, 2), e.target.value)});
   }
   renderSexRow(row) {
     return (
@@ -129,7 +173,7 @@ class Profile extends React.Component {
             className='profile__sex__list-item__label__input'
             modifier='material'
             inputId={`radio-${row}`}
-            checked={row === this.state.selectedSexType}
+            checked={row === this.state.gender}
             onChange={this.handleSexChange.bind(this, row)}
             type='radio'
             />
@@ -140,11 +184,39 @@ class Profile extends React.Component {
       </ListItem>
     );
   }
+
   handleFabClick() {
-    console.log('fab click');
+    const profile = {};
+    if (this.state.gender === 'Female') {
+      profile.gender = 'female';
+    }
+    if (this.state.gender === 'Male') {
+      profile.gender = 'male';
+    }
+    if (this.state.publicEmail) { profile.publicEmail = this.state.publicEmail; }
+    if (this.state.firstName) { profile.firstName = this.state.firstName; }
+    if (this.state.lastName) { profile.lastName = this.state.lastName; }
+    if (this.state.username) { profile.username = this.state.username; }
+    if (this.state.Facebook) { profile.Facebook = this.state.Facebook; }
+    if (this.state.Twitter) { profile.Twitter = this.state.Twitter; }
+    if (this.state.about) { profile.about = this.state.about; }
+    if (this.state.address) { profile.address = this.state.address; }
+    if (this.state.birthDay) { profile.birthday = this.state.birthDay.format('MM/DD/YYYY'); }
+    if (this.state.city) { profile.city = this.state.city; }
+    if (this.state.country) { profile.country = this.state.country; }
+    if (this.state.zipVal) { profile.zip = this.state.zipVal; }
+    if (this.state.state) { profile.state = this.state.state; }
+    if (this.state.spiritualBelief.value) { profile.spiritualBelief = this.state.spiritualBelief.value; }
+    if (this.state.image) { profile.avatar = this.state.zipVal; }
+    let skills = this.state.currentSportList ? this.state.currentSportList : [];
+    if (skills) { profile.skills = skills; }
+    this.props.updateProfile({
+      profile,
+      profileID: this.state.profileID
+    });
   }
   submit(data) {
-    console.log(JSON.stringify(data, null, 4));
+    // console.log(JSON.stringify(data, null, 4));
   }
   enableButton() {
     this.setState({ canSubmit: true });
@@ -152,26 +224,19 @@ class Profile extends React.Component {
   disableButton() {
     this.setState({ canSubmit: false });
   }
-
   handleSpiritualBeliefChange(val) {
-    this.setState({ spiritualBeliefVal: val });
+    this.setState({ spiritualBelief: val });
   }
-
   handleCurrentSportChange(val) {
-    console.log(val);
     this.setState({ currentSportVal: val });
   }
-
   handleCurrentAbilityLevelChange(val) {
-    console.log(val);
     this.setState({ currentAbilityLevelVal: val });
   }
-
   handleAddSport() {
     let sport = this.state.currentSportVal;
     let level = this.state.currentAbilityLevelVal;
     let list = this.state.currentSportList;
-
     if ((!!sport && Object.keys(sport).length !== 0) &&
         (!!level && Object.keys(level).length !== 0)
     ) {
@@ -179,13 +244,11 @@ class Profile extends React.Component {
       this.setState({ currentSportList: list, currentSportVal: null, currentAbilityLevelVal: null });
     }
   }
-
   handleDelSport(idx) {
     let list = this.state.currentSportList;
     list.splice(idx, 1);
     this.setState({ currentSportList: list });
   }
-
   renderSports(arr) {
     return (
         arr.map((item, idx) => {
@@ -209,7 +272,6 @@ class Profile extends React.Component {
         })
     );
   }
-
   onloadImg(e) {
     let resultImg = e.target.result;
     console.log(resultImg);
@@ -258,9 +320,9 @@ class Profile extends React.Component {
                         <span className='profile__red-label' >*</span>
                         <Input
                             className='profile__input__wide'
-                            value={this.state.firstname}
+                            value={this.state.firstName}
                             onChange={this.handleChange}
-                            id='firstname'
+                            id='firstName'
                             modifier='material'
                             placeholder='First Name' />
                     </div>
@@ -268,9 +330,9 @@ class Profile extends React.Component {
                     <div className='profile__input__child' >
                         <Input
                             className='profile__input__wide'
-                            value={this.state.lastname}
+                            value={this.state.lastName}
                             onChange={this.handleChange}
-                            id='lastname'
+                            id='lastName'
                             modifier='material'
                             placeholder='Last Name' />
                     </div>
@@ -309,7 +371,6 @@ class Profile extends React.Component {
                       type='file'
                       accept='image/jpeg,image/png,image/gif'
                       onChange={(e) => {
-                        console.log('changed', e);
                         if (e.target.files && e.target.files[0]) {
                           let reader = new FileReader();
                           reader.onload = this.onloadImg;
@@ -328,28 +389,29 @@ class Profile extends React.Component {
                 <span className='profile__red-label' >*</span>
                 <Input
                     className='profile__input__wide'
-                    value={this.state.email}
+                    value={this.state.publicEmail}
                     onChange={this.handleChange}
-                    id='email'
+                    id='publicEmail'
                     modifier='material'
                     placeholder='Email' />
             </div>
 
             <div className='profile__input__child'>
                 <DatePicker
-                    className='text-input text-input--material '
+                    className='text-input text-input--material'
                     placeholderText='Date of Birth'
                     showYearDropdown
-                    selected={this.state.dateBirth}
+                    defaultValue='01/01/2010'
+                    selected={this.state.birthDay}
                     onChange={this.handleDatebirthChange} />
             </div>
 
             <div className='profile__input__child' >
                 <Input
                     className='profile__input__wide'
-                    value={this.state.fbProfile}
+                    value={this.state.Facebook}
                     onChange={this.handleChange}
-                    id='fbProfile'
+                    id='Facebook'
                     modifier='material'
                     placeholder='Facebook Profile' />
             </div>
@@ -357,9 +419,9 @@ class Profile extends React.Component {
             <div className='profile__input__child' >
                 <Input
                     className='profile__input__wide'
-                    value={this.state.twProfile}
+                    value={this.state.Twitter}
                     onChange={this.handleChange}
-                    id='twProfile'
+                    id='Twitter'
                     modifier='material'
                     placeholder='Twitter Profile' />
             </div>
@@ -402,7 +464,7 @@ class Profile extends React.Component {
                       this.state.showBlock || this.state.isZipShow ? <div className='profile__input__child' >
                          <Input
                             className='profile__input__wide'
-                            value={this.state.zipVal}
+                            value={this.state.zip.toString()}
                             onChange={this.handleZipChange}
                             modifier='material'
                             placeholder='Zip' />
@@ -415,7 +477,7 @@ class Profile extends React.Component {
                         <Select
                             placeholder='Country'
                             name='form-field-Country'
-                            value={this.state.countryVal}
+                            value={this.state.country}
                             options={constants.Country}
                             onChange={this.handleCountryChange}
                             />
@@ -426,8 +488,8 @@ class Profile extends React.Component {
                           <Select
                               placeholder='State'
                               name='form-field-State'
-                              value={this.state.stateVal}
-                              options={this.state.showBlock ? constants.State[this.state.countryVal.value] : []}
+                              value={this.state.state}
+                              options={this.state.showBlock ? constants.State[this.state.country.value] : []}
                               onChange={this.handleStateChange}
                               />
                       </div> : null
@@ -442,7 +504,7 @@ class Profile extends React.Component {
                 <Select
                   placeholder='Spiritual Belief'
                   name='form-field-spiritualBeliefs'
-                  value={this.state.spiritualBeliefVal}
+                  value={this.state.spiritualBelief}
                   options={constants.SpiritualBeliefs}
                   onChange={this.handleSpiritualBeliefChange}
                   />
@@ -504,7 +566,7 @@ class Profile extends React.Component {
             </div>
             <div className='actionButtonContainer' >
               <div className='actionButton'
-                   onClick={this.handleFabClick}>
+                   onClick={() => this.handleFabClick() }>
                 <Icon icon='md-check, material:md-check' />
               </div>
             </div>

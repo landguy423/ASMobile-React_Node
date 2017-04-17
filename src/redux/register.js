@@ -1,21 +1,16 @@
-import _ from 'lodash';
-
 const TYPE = {
-  ADD_REGISTER_DATA: 'ADD_REGISTER_DATA',
-  ADD_REGISTER_DATA_CONTINUE: 'ADD_REGISTER_DATA_CONTINUE'
+  ADD_REGISTER_DATA: 'ADD_REGISTER_DATA'
 };
 
-export let addRegisterData = (data) => ({
+export let addRegisterData = (data, status) => ({
   type: TYPE.ADD_REGISTER_DATA,
-  data
-});
-export let addRegisterDataContinue = (data) => ({
-  type: TYPE.ADD_REGISTER_DATA_CONTINUE,
-  data
+  data,
+  status
 });
 
 const initialState = {
-  data: null
+  data: null,
+  status: false
 };
 
 export default (_state = initialState, action = {}) => {
@@ -24,11 +19,8 @@ export default (_state = initialState, action = {}) => {
     case TYPE.ADD_REGISTER_DATA:
       return {
         ...state,
+        status: action.status,
         data: action.data
-      };
-    case TYPE.ADD_REGISTER_DATA_CONTINUE:
-      return {
-        data: _.merge(state.data, action.data)
       };
     default:
       return state;

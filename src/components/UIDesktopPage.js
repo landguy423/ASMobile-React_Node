@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as navigatorActions from '../redux/navigator';
 import * as panelActions from '../redux/panel';
-import * as authActions from '../redux/auth';
 import * as utilityActions from '../redux/utility';
 import {
   Page
@@ -14,8 +13,9 @@ import ToolbarDesktop from './ToolbarDesktop';
 import NearMe from './NearMe';
 import Profile from './Profile';
 import UserProfile from './UserProfile';
-import Login from './Login';
-import ForgotPassword from './ForgotPassword';
+import Login from '../containers/Login';
+import ForgotPassword from '../containers/ForgotPassword';
+import ResetPassword from '../containers/ResetPassword';
 import HomeDesktop from './HomeDesktop';
 import Notifications from './Notifications';
 import DefaultRegisterPage from './DefaultRegisterPage';
@@ -29,7 +29,7 @@ import LaunchPage from './LaunchPage';
 import Help from './Help';
 
 @connect((state) => ({ navigator: state.navigator, panel: state.panel, auth: state.auth, utility: state.utility }),
-    (dispatch) => ({ actions: bindActionCreators({...navigatorActions, ...panelActions, ...authActions, ...utilityActions}, dispatch) }))
+    (dispatch) => ({ actions: bindActionCreators({...navigatorActions, ...panelActions, ...utilityActions}, dispatch) }))
 
 class UIDesktopPage extends React.Component {
   constructor(props) {
@@ -97,6 +97,8 @@ class UIDesktopPage extends React.Component {
         return (<Login />);
       case 'Forgot password':
         return (<ForgotPassword />);
+      case 'Reset password':
+        return (<ResetPassword />);
       case 'Register':
         return (<DefaultRegisterPage />);
       case 'About':

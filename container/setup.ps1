@@ -9,9 +9,9 @@ docker stop $SRV_NAME
 docker rm --force $SRV_NAME
 docker rmi --force asc/$SRV_NAME
 
-tar cvf ascweb.tar.gz -C ./ ./www/* index.js
+tar cvf ascweb.tar.gz -C ./ ./www/* ./src/config.js index.js
 #append the needed files from the ./container directory to root app directory
-tar rvf ascweb.tar.gz -C ./container config.js package.json app.js
+tar rvf ascweb.tar.gz -C ./container package.json app.js
 
 docker build -f .\container\Dockerfile -t asc/$SRV_NAME .
 

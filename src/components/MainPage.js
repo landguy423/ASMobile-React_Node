@@ -12,7 +12,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as navigatorActions from '../redux/navigator';
 import * as panelActions from '../redux/panel';
-import * as authActions from '../redux/auth';
+import * as authActions from '../redux/auth/authActions';
 import * as utilityActions from '../redux/utility';
 import * as conversationsActions from '../redux/conversations';
 import * as selectedConversationActions from '../redux/selectedConversation';
@@ -96,7 +96,8 @@ class MainPage extends React.Component {
           let loadData = JSON.parse(window.localStorage.loadData);
           console.log('loadData before: ', loadData);
           this.props.actions.setHistoryState(loadData);
-          this.props.actions.switchAuth(loadData.isLogin);
+          // switchAuth is deprecated
+          // this.props.actions.switchAuth(loadData.isLogin);
           window.localStorage.setItem('shouldLoad', false);
           console.log('after: ', window.localStorage.loadData);
           console.log('DEVICE LOAD');
@@ -317,7 +318,7 @@ class MainPage extends React.Component {
                                              this.props.actions.pushPage(false, 'HOME');
                                              this.props.actions.setMap(false);
                                              this.props.actions.setNavMap(false);
-                                             this.props.actions.switchAuth(false);
+                                             this.props.actions.logOut();
                                            } } />
                        </div>
                         : null

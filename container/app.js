@@ -1,26 +1,48 @@
 const path = require('path');
 const express = require('express');
-const dockerconfig = require('./config.js');
+// const webpack = require('webpack');
+// const webpackMiddleware = require('webpack-dev-middleware');
+// const webpackHotMiddleware = require('webpack-hot-middleware');
+// const config = require('./webpack.config.prod.js');
+const dockerconfig = require('./src/config');
 
+// const isDeveloping = process.env.NODE_ENV !== 'production';
 const app = express();
 
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
+/**
+if (isDeveloping) { // isDeveloping === false in "npm start" now
+  const compiler = webpack(config);
+  const middleware = webpackMiddleware(compiler, {
+    publicPath: config.output.publicPath,
+    contentBase: 'www', // src
+    stats: {
+      colors: true,
+      hash: false,
+      timings: true,
+      chunks: false,
+      chunkModules: false,
+      modules: false
+    }
+  });
 
+  app.use(middleware);
+  app.use(webpackHotMiddleware(compiler));
+  app.get('*', function response(req, res) {
+    res.write(middleware.fileSystem.readFileSync(path.join(__dirname, 'www/index.html')));
+    res.end();
+  });
+} else {
+*/
 app.use(express.static(path.join(__dirname, '/www')));
-
-app.get('/test1000', function response(req, res) {
-  var start = Date.now();
-  setTimeout(function() {
-    res.send('test 111\n' + (Date.now() - start) + 'ms');
-  }, getRandomInt(100, 800));
-});
-
 app.get('*', function response(req, res) {
   res.sendFile(path.join(__dirname, 'www/index.html'));
 });
+app.get('/reg', function response(req, res) {
+  res.sendFile(path.join(__dirname, 'www/index.html'));
+});
+// }
 
+// App startup
 if (!global.TESTING && dockerconfig.NODE_ENV !== 'test') {
   app.listen(dockerconfig.APP_PORT, dockerconfig.APP_HOST, function onStart(err) {
     if (err) {

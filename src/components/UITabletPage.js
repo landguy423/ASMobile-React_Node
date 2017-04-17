@@ -15,8 +15,9 @@ import HomeTablet from './HomeTablet';
 import NearMe from './NearMe';
 import Profile from './Profile';
 import UserProfile from './UserProfile';
-import Login from './Login';
-import ForgotPassword from './ForgotPassword';
+import Login from '../containers/Login';
+import ForgotPassword from '../containers/ForgotPassword';
+import ResetPassword from '../containers/ResetPassword';
 import Notifications from './Notifications';
 import DefaultRegisterPage from './DefaultRegisterPage';
 import About from './About';
@@ -75,6 +76,8 @@ class UITabletPage extends React.Component {
         return (<Login />);
       case 'Forgot password':
         return (<ForgotPassword />);
+      case 'Reset password':
+        return (<ResetPassword />);
       case 'Register':
         return (<DefaultRegisterPage />);
       case 'About':

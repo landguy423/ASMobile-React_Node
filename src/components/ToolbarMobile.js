@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as navigatorActions from '../redux/navigator';
 import * as panelActions from '../redux/panel';
-import * as authActions from '../redux/auth';
 import * as utilityActions from '../redux/utility';
 
 import commonUtils from '../utils/commonUtils';
@@ -19,7 +18,7 @@ import {
 import staticImage from '../staticImages';
 
 @connect((state) => ({ navigator: state.navigator, panel: state.panel, auth: state.auth, utility: state.utility, selectedConversation: state.selectedConversation, conversations: state.conversations }),
-    (dispatch) => ({ actions: bindActionCreators({...navigatorActions, ...panelActions, ...authActions, ...utilityActions}, dispatch) }))
+    (dispatch) => ({ actions: bindActionCreators({...navigatorActions, ...panelActions, ...utilityActions}, dispatch) }))
 
 class CustomToolbar extends React.Component {
   constructor(props) {

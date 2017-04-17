@@ -1,11 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import * as navigatorActions from '../redux/navigator';
-import * as panelActions from '../redux/panel';
-import * as authActions from '../redux/auth';
-import * as registerActions from '../redux/register';
-import { editUser, registerUser } from '../api/User';
+import {
+  pushPage,
+  changeToolbarType,
+  setNavSwipeablePanel
+} from '../redux/navigator';
+import { saveProfile } from '../redux/auth/authActions';
+import { getAuth } from '../redux/auth/authSelectors';
+import { addRegisterData } from '../redux/register';
 
 import {
     Icon,
@@ -33,8 +35,24 @@ import zipcoder from '../utils/zipcoder';
 
 import constants from '../constants';
 
-@connect((state) => ({ navigator: state.navigator, panel: state.panel, auth: state.auth, register: state.register }),
-    (dispatch) => ({ actions: bindActionCreators({...navigatorActions, ...panelActions, ...authActions, ...registerActions}, dispatch) }))
+const mapStateToProps = state => ({
+  navigator: state.navigator,
+  panel: state.panel,
+  auth: getAuth(state),
+  register: state.register
+});
+
+const mapDispatchToProps = dispatch => ({
+  pushPage: (showPage, namePage) => dispatch(pushPage(showPage, namePage)),
+  changeToolbarType: toolbarType => dispatch(changeToolbarType(toolbarType)),
+  setNavSwipeablePanel: isSwipeable => {
+    return dispatch(setNavSwipeablePanel(isSwipeable));
+  },
+  saveProfile: data => dispatch(saveProfile.request(data)),
+  addRegisterData: (data, status) => dispatch(addRegisterData(data, status))
+});
+
+@connect(mapStateToProps, mapDispatchToProps)
 
 class ContinueRegisterPage extends React.Component {
   constructor(props) {
@@ -100,27 +118,40 @@ class ContinueRegisterPage extends React.Component {
 
   componentWillMount() {
     let self = this;
-    let countriesList = countries.all.map(function(key, index) { return { label: key.name, value: key.name.replace(/\s*/g, '') }; });
+    let countriesList = countries.all.map((key, index) => ({ label: key.name, value: key.name.replace(/\s*/g, '') }));
+
     this.setState({ countries: countriesList });
     zipcoder.location(function(data) {
       self.setState({ zipVal: data ? data.zipcode : '', city: data ? data.city : '', isZipShow: true });
     });
-    let auth = this.props.auth.fbAuthData;
-    if (auth) {
-      this.setState({ firstName: auth.first_name, lastName: auth.last_name, email: auth.email, gender: auth.gender });
+
+    let {data} = this.props.register;
+
+    if (data) {
+      this.setState({ firstName: data.firstName, lastName: data.lastName, email: data.email, gender: data.gender });
+
+      this.props.addRegisterData({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: data.password
+      }, false);
     }
-    let register = this.props.register.data;
-    if (register) {
-      this.setState({ firstName: register.firstName, lastName: register.lastName, email: register.email });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const {userProfile} = nextProps.auth;
+
+    if (userProfile) {
+      this.setState({isOpenModel: true, alertDialogMessage: 'Saved profile. Press OK ', alertDialogCallback: this.dialogSuccess});
     }
   }
 
   dialogSuccess() {
     this.setState({isOpenModel: false});
-    this.props.actions.switchAuth(true);
-    this.props.actions.pushPage(false, 'HOME');
-    this.props.actions.changeToolbarType('main');
-    this.props.actions.setNavSwipeablePanel(true);
+    this.props.pushPage(false, 'HOME');
+    this.props.changeToolbarType('main');
+    this.props.setNavSwipeablePanel(true);
   }
 
   handleAlertDialogCancel() {
@@ -129,23 +160,25 @@ class ContinueRegisterPage extends React.Component {
 
   handleAlertDialogOk() {
     this.setState({isOpenModel: false});
-    this.props.actions.pushPage(true, 'LOGIN');
+    this.props.pushPage(true, 'LOGIN');
   }
 
   handleFabClick() {
     if (!this.state.userName) {
       this.setState({ isOpenModel: true, alertDialogMessage: 'Please, type your username.' });
+      return;
     }
-    // const profileID = this.props.auth.userAuthData.profile._id;
-    // const token = this.props.auth.token;
+
+    const {userAuthData} = this.props.auth;
+    const { email, firstName, lastName } = this.props.register.data;
+
     const profile = {
-      firstName: this.props.register.data.firstName,
-      lastName:	this.props.register.data.lastName,
-      // firstName: this.props.auth.userAuthData.profile.firstName,
-      // lastName:	this.props.auth.userAuthData.profile.lastName,
-      username: this.state.userName
+      firstName: firstName,
+      lastName:	lastName,
+      username: this.state.userName,
+      publicEmail: email
     };
-    console.log('PROFILE', profile);
+
     if (this.state.gender) profile.gender = this.state.gender;
     if (this.state.birthDate) profile.birthday = this.state.birthDate.format('MM/DD/YYYY');
     if (this.state.city) profile.city = this.state.city;
@@ -153,34 +186,15 @@ class ContinueRegisterPage extends React.Component {
     if (this.state.zipVal) profile.zip = this.state.zipVal;
     if (this.state.stateVal.value) profile.state = this.state.stateVal.value;
     if (this.state.spiritualBeliefVal.value) profile.spiritualBelief = this.state.spiritualBeliefVal.value;
-    // if (this.state.currentSportList)
-    profile.skills = this.state.currentSportList ? this.state.currentSportList : [];
-      const regInfo = window.localStorage.getItem('regInfo');
-      registerUser({email: this.props.register.data.email, password: this.props.register.data.password, firstName: this.props.register.data.firstName, lastName: this.props.register.data.lastName, regInfo})
-      .then(registerResponse => {
-        console.log('~~~~~registerResponse', registerResponse);
-        this.props.actions.addAuth({
-          email: registerResponse.userAuth.email,
-          identityID: registerResponse.userAuth._id,
-          profile: registerResponse.userProfile
-        });
-        this.props.actions.addToken(registerResponse.token);
-        // step to next page
-        window.localStorage.removeItem('regInfo');
-          const profileID = this.props.auth.userAuthData.profile._id;
-          editUser(registerResponse.userProfile._id, registerResponse.token, profile)
-              .then(continueRegisterResponse => {
-                  this.props.actions.addAuthContinue({ profile: continueRegisterResponse.profileCreated });
-                  this.setState({isOpenModel: true, alertDialogMessage: 'Finish. Press OK to press OK', alertDialogCallback: this.dialogSuccess});
-              });
+    profile.skills = this.state.currentSportList || [];
 
-      }).catch(error => {
-        error.success = false;
-        // UI msg about error
-        console.log('ACHTUNG OUTER', error);
-      });
+    const regInfo = window.localStorage.getItem('regInfo');
 
-
+    this.props.saveProfile({
+      identityID: userAuthData.identityID,
+      culture: regInfo || '',
+      ...profile
+    });
   }
   handleSexChange(sex) {
     this.setState({gender: sex});
@@ -249,12 +263,10 @@ class ContinueRegisterPage extends React.Component {
   }
 
   handleCurrentSportChange(val) {
-    // console.log(val);
     this.setState({ currentSportVal: val });
   }
 
   handleCurrentAbilityLevelChange(val) {
-    // console.log(val);
     this.setState({ currentAbilityLevelVal: val });
   }
 
@@ -302,8 +314,6 @@ class ContinueRegisterPage extends React.Component {
   }
 
   render() {
-    // console.log('RegisterContinue->', this.props);
-
     let sport = this.state.currentSportVal;
     let level = this.state.currentAbilityLevelVal;
     let checkAddSport = (!!sport && Object.keys(sport).length !== 0) && (!!level && Object.keys(level).length !== 0);
@@ -408,7 +418,7 @@ class ContinueRegisterPage extends React.Component {
 
                 </Col>
                 <Col width='50%'>
-                    <div className='profile__input__child__small' >
+                    <div id='country_select' className='profile__input__child__small' >
                         <Select
                             placeholder='Country'
                             name='form-field-Country'
@@ -419,7 +429,7 @@ class ContinueRegisterPage extends React.Component {
                     </div>
 
                     {
-                      this.state.showBlock ? <div className='profile__input__child__small' >
+                      this.state.showBlock ? <div id='state_select' className='profile__input__child__small' >
                           <Select
                               placeholder='State'
                               name='form-field-State'
@@ -435,7 +445,7 @@ class ContinueRegisterPage extends React.Component {
             <ProfileSection title={'INTERESTS'} />
 
             <Col width='100%'>
-              <div className='profile__input__child__small' >
+              <div id='select_spiritual' className='profile__input__child__small' >
                 <Select
                   placeholder='Spiritual Belief'
                   name='form-field-spiritualBeliefs'
@@ -447,7 +457,7 @@ class ContinueRegisterPage extends React.Component {
             </Col>
             <Row>
               <Col width='50%'>
-                <div className='profile__input__child__small' >
+                <div id='select_sports' className='profile__input__child__small' >
                   <Select
                     placeholder='Sports List'
                     name='form-field-sportsList'
@@ -458,7 +468,7 @@ class ContinueRegisterPage extends React.Component {
                 </div>
               </Col>
               <Col width='30%'>
-                <div className='profile__input__child__small' >
+                <div id='select_ability' className='profile__input__child__small' >
                   <Select
                     placeholder='Ability Level'
                     name='form-field-sportsList'
@@ -475,13 +485,6 @@ class ContinueRegisterPage extends React.Component {
               </Col>
             </Row>
             {this.renderSports(this.state.currentSportList)}
-
-             {/* <div className='actionButtonContainer' >
-              <div className='actionButton'
-                   onClick={this.handleFabClick}>
-                <Icon icon='md-check, material:md-check' />
-              </div>
-            </div>*/}
             <Fab
               style={{backgroundColor: '#9e1c26'}}
               className='actionButton'
@@ -494,16 +497,12 @@ class ContinueRegisterPage extends React.Component {
             <AlertDialog isOpen={this.state.isOpenModel} isCancelable={false} onCancel={this.handleAlertDialogCancel}>
                 <div className='alert-dialog-title'>Info</div>
                 <div className='alert-dialog-content'>
-                   {/* Please Validate Your Email Account*/}
                     {this.state.alertDialogMessage}
                 </div>
                 <div className='alert-dialog-footer'>
                     <button onClick={this.state.alertDialogCallback} className='alert-dialog-button'>
                         OK
                     </button>
-                    {/* <button onClick={this.handleAlertDialogOk} className='alert-dialog-button'>
-                        OK
-                    </button>*/}
                 </div>
             </AlertDialog>
         </div>

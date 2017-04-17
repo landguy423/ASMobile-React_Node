@@ -52,3 +52,6 @@ jspm_packages
 # Cordova files
 platforms
 plugins
+
+# Test Report
+test-report.xml

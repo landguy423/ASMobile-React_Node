@@ -58,8 +58,22 @@ let initialState = {
   previousToolbarType: 'main'
 };
 
+let signupFlag = window.localStorage.getItem('signupFlag');
+
+let pos_fb = window.location.search.indexOf('?code=');
+
+if (pos_fb !== -1) {
+  if (signupFlag === 'true') {
+    // register page
+    initialState.namePage = 'Register';
+  } else if (signupFlag === 'false') {
+    // login page
+    initialState.namePage = 'LOGIN';
+  }
+}
+
 let hash = window.location.hash; // eg #Register?google-2016-12-0101`
-let pos = window.location.hash.indexOf('#Register?');
+let pos = hash.indexOf('#Register?');
 if (pos !== -1) {
   window.localStorage.setItem('regInfo', hash.slice(10));
   initialState.namePage = 'Register';

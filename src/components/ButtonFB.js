@@ -1,22 +1,44 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
 // import fetch from 'isomorphic-fetch';
 
-import * as navigatorActions from '../redux/navigator';
-import * as authActions from '../redux/auth';
-import * as panelActions from '../redux/panel';
-import { registerFBUser, loginFBUser } from '../api/User';
+import {
+  pushPage,
+  changeToolbarType,
+  setNavSwipeablePanel
+} from '../redux/navigator';
+
+import { registerFBUser, loginFacebook } from '../redux/auth/authActions';
+import { addRegisterData } from '../redux/register';
 
 import {
-    Icon
+    Icon,
+    AlertDialog
 } from 'react-onsenui';
 
 import FacebookLogin from 'react-facebook-login';
 import facebookUtils from '../utils/facebookUtils';
 
-@connect((state) => ({ ...state }),
-    (dispatch) => ({ actions: bindActionCreators({...navigatorActions, ...authActions, ...panelActions}, dispatch) }))
+const mapStateToProps = state => ({
+  navigator: state.navigator,
+  panel: state.panel,
+  auth: state.auth,
+  register: state.register,
+  utility: state.utility
+});
+
+const mapDispatchToProps = dispatch => ({
+  pushPage: (showPage, namePage) => dispatch(pushPage(showPage, namePage)),
+  changeToolbarType: toolbarType => dispatch(changeToolbarType(toolbarType)),
+  setNavSwipeablePanel: isSwipeable => {
+    return dispatch(setNavSwipeablePanel(isSwipeable));
+  },
+  registerFBUser: user => dispatch(registerFBUser.request(user)),
+  loginFacebook: user => dispatch(loginFacebook.request(user)),
+  addRegisterData: (data, status) => dispatch(addRegisterData(data, status))
+});
+
+@connect(mapStateToProps, mapDispatchToProps)
 
 class ButtonFB extends React.Component {
   constructor(props) {
@@ -24,6 +46,7 @@ class ButtonFB extends React.Component {
     this.responseFacebook = this.responseFacebook.bind(this);
     this.regestrationCB = this.regestrationCB.bind(this);
     this.state = {
+      isOpenModel: false,
       facebookLoginCallback: this.responseFacebook,
       facebookLoginOnClick: undefined
     };
@@ -35,58 +58,74 @@ class ButtonFB extends React.Component {
     }
   }
 
+  componentWillReceiveProps(nextProps) {
+    const { userAuthData, fbAuthData, fbUserToken, errors } = nextProps.auth;
+    const { register } = nextProps;
+
+    if (errors) {
+      if (errors.registerFBUser) {
+        this.setState({isOpenModel: true, alertDialogMessage: errors.registerFBUser.message});
+      }
+      if (errors.loginFacebook) {
+        this.setState({isOpenModel: true, alertDialogMessage: errors.loginFacebook.message});
+      }
+    }
+
+    if (userAuthData && fbUserToken) {
+      // Fb user registration
+      if (!register.status) {
+        nextProps.pushPage(true, 'ContinueRegister');
+      }
+    }
+
+    if (fbAuthData) {
+      // Fb user login
+      this.props.setNavSwipeablePanel(true);
+      this.props.pushPage(false, 'HOME');
+      this.props.changeToolbarType('main');
+    }
+  }
+
   responseFacebook(response) {
-    console.log('response -->', response);
+    // console.log('FacebookLogin Response -->', response);
+    let signupFlag = window.localStorage.getItem('signupFlag');
     if (response.status !== 'unknown') {
-      loginFBUser(response.accessToken)
-      .then((jwt) => {
-        console.log('LOGIN RESULT:', jwt);
-        this.props.actions.addToken(jwt);
-      });
-      // this.props.actions.addFacebookToken(response.accessToken);
-      // this.props.actions.addAuthFacebook(response);
-      console.log('fbAuthData: ', this.props.auth.fbAuthData);
-      this.props.actions.switchAuth(true);
-      this.props.actions.setNavSwipeablePanel(true);
-      this.props.actions.pushPage(false, 'HOME');
-      this.props.actions.changeToolbarType('main');
+      if (signupFlag === 'true') {
+        // fb register
+        const regInfo = window.localStorage.getItem('regInfo');
+
+        this.props.addRegisterData({
+          firstName: response.first_name,
+          lastName: response.last_name,
+          email: response.email,
+          gender: response.gender
+        }, true);
+
+        this.props.registerFBUser({ facebookInfo: response, regInfo });
+      } else {
+        // fb login
+        this.props.loginFacebook({ facebookInfo: response });
+      }
     }
   }
 
   regestrationCB(response) {
-    console.log('REGISTRATION FB', response);
+    // console.log('Facebook Registration -->', response);
     if (response.status !== 'unknown') {
       const regInfo = window.localStorage.getItem('regInfo');
-      // let fbRegistration = true;
-      // registerFBUser({
-        // email: response.email,
-        // firstName: response.first_name,
-        // lastName: response.last_name,
-      registerFBUser({ facebookAccessToken: response.accessToken, regInfo })
-      .then(registerResponse => {
-        console.log('REGISTERED USER\n', registerResponse);
-        // this.props.actions.addAuth({
-        //   email: registerResponse.userAuth.email, // TODO check email at FB reg
-        //   identityID: registerResponse.userAuth._id,
-        //   profile: registerResponse.userProfile
-        // });
-        this.props.actions.addToken(registerResponse.token);
-        // step to next page
-        window.localStorage.removeItem('regInfo');
-        // this.pushPage();
-      }).catch(error => {
-        error.success = false;
-        console.log('ACHTUNG OUTER( cannot login/facebook )', error);
-      });
-
-      this.props.actions.pushPage(true, 'ContinueRegister');
+      this.setState({firstName: response.first_name, lastName: response.last_name, email: response.email, gender: response.gender});
+      this.props.registerFBUser({ facebookInfo: response, regInfo });
     }
   }
 
+  closeDialog() {
+    this.setState({isOpenModel: false});
+  }
+
   render() {
-    console.log('process.env', process);
     return (
-      this.props.utility.isDevice
+      <span>
+      {this.props.utility.isDevice
         ? <span
             className='facebookButtonClass buttonFB'
             onClick={() => {
@@ -110,6 +149,19 @@ class ButtonFB extends React.Component {
             cssClass='facebookButtonClass'
             icon={<Icon icon='ion-social-facebook, material:ion-social-facebook' className='buttonFB__web' />}
             />
+      }
+        <AlertDialog isOpen={this.state.isOpenModel} isCancelable={false}>
+            <div className='alert-dialog-title'>Facebook Warning</div>
+            <div className='alert-dialog-content'>
+                {this.state.alertDialogMessage}
+            </div>
+            <div className='alert-dialog-footer'>
+                <button onClick={this.closeDialog.bind(this)} className='alert-dialog-button'>
+                    Close
+                </button>
+            </div>
+        </AlertDialog>
+      </span>
     );
   }
 }

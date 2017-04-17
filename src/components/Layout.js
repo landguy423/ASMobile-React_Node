@@ -11,7 +11,7 @@ import Profile from './Profile';
 import DefaultRegisterPage from './DefaultRegisterPage';
 import ContinueRegisterPage from './ContinueRegisterPage';
 import NearMe from './NearMe';
-import Login from './Login';
+import Login from '../containers/Login';
 import Notifications from './Notifications';
 import About from './About';
 import Terms from './Terms';

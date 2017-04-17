@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as navigatorActions from '../redux/navigator';
 import * as panelActions from '../redux/panel';
-import * as authActions from '../redux/auth';
 import * as registerActions from '../redux/register';
 import {
   BottomToolbar
@@ -17,7 +16,7 @@ import {
 import ShoppingCartItem from './ShoppingCartItem';
 
 @connect((state) => ({ navigator: state.navigator, panel: state.panel, auth: state.auth, register: state.register, utility: state.utility }),
-    (dispatch) => ({ actions: bindActionCreators({...navigatorActions, ...panelActions, ...authActions, ...registerActions}, dispatch) }))
+    (dispatch) => ({ actions: bindActionCreators({...navigatorActions, ...panelActions, ...registerActions}, dispatch) }))
 
 class ShoppingCart extends React.Component {
   constructor(props) {

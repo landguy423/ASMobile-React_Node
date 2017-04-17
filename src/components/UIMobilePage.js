@@ -16,8 +16,9 @@ import UserProfile from './UserProfile';
 import DefaultRegisterPage from './DefaultRegisterPage';
 import ContinueRegisterPage from './ContinueRegisterPage';
 import NearMe from './NearMe';
-import Login from './Login';
-import ForgotPassword from './ForgotPassword';
+import Login from '../containers/Login';
+import ForgotPassword from '../containers/ForgotPassword';
+import ResetPassword from '../containers/ResetPassword';
 import LaunchPage from './LaunchPage';
 import Notifications from './Notifications';
 import About from './About';
@@ -91,6 +92,9 @@ class UIMobilePage extends React.Component {
         break;
       case 'Forgot password':
         renderedComponent = <ForgotPassword />;
+        break;
+      case 'Reset password':
+        renderedComponent = <ResetPassword />;
         break;
       case 'About':
         renderedComponent = <About />;

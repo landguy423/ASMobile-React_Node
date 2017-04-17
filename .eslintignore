@@ -6,3 +6,8 @@ platforms
 plugins
 scripts
 www
+tests/integration/test/support/**
+tests/integration/src/support/**
+tests/integration/src/support/helpers/**
+tests/integration/src/steps/**
+tests/integration/src/tagProcessor.js

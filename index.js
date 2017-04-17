@@ -8,12 +8,17 @@ import {AppContainer} from 'react-hot-loader';
 
 import {Provider} from 'react-redux';
 
-import Store from './src/redux';
+import configureStore from './src/redux/store';
+import rootSaga from './src/redux/store/sagas';
+
 import App from './src/components/App';
 
 import ons from 'onsenui';
 import 'onsenui/css/onsenui.css';
 import './src/stylus/index.styl';
+
+const store = configureStore();
+store.runSaga(rootSaga);
 
 const rootElement = document.getElementById('root');
 
@@ -22,7 +27,7 @@ ons.ready(() => {
   render(
   <AppContainer>
     <MuiThemeProvider>
-      <Provider store={Store}>
+      <Provider store={store}>
         <App />
       </Provider>
     </MuiThemeProvider>
@@ -37,7 +42,7 @@ if (module.hot) {
     render(
       <AppContainer>
         <MuiThemeProvider>
-          <Provider store={Store}>
+          <Provider store={store}>
             <NextApp />
           </Provider>
         </MuiThemeProvider>

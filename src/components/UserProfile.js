@@ -5,7 +5,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import * as navigatorActions from '../redux/navigator';
 import * as panelActions from '../redux/panel';
-import * as authActions from '../redux/auth';
 import * as utilityActions from '../redux/utility';
 import * as registerActions from '../redux/register';
 import * as conversationsActions from '../redux/conversations';
@@ -33,7 +32,7 @@ import zipcoder from '../utils/zipcoder';
 import staticImage from '../staticImages';
 
 @connect((state) => ({ navigator: state.navigator, conversations: state.conversations, panel: state.panel, auth: state.auth, register: state.register, utility: state.utility }),
-    (dispatch) => ({ actions: bindActionCreators({...navigatorActions, ...panelActions, ...authActions, ...registerActions, ...conversationsActions, ...selectedConversationActions, ...utilityActions}, dispatch) }))
+    (dispatch) => ({ actions: bindActionCreators({...navigatorActions, ...panelActions, ...registerActions, ...conversationsActions, ...selectedConversationActions, ...utilityActions}, dispatch) }))
 
 export default class UserProfile extends React.Component {
   constructor(props) {

@@ -89,10 +89,10 @@ class Help extends React.Component {
       body: 'to=xsc@xschristians.org&' +
       `subject=${encodeURIComponent(this.state.subject)}&` +
       `text=${encodeURIComponent(this.state.message)}${this.props.utility.isDevice ? '' : `\n\nSystemInfo/userAgent:\n\n${encodeURIComponent(window.navigator.userAgent)}`}&` +
-      `from=${this.props.auth.fbAuthData.email}&` +
-      `fromname=${this.props.auth.fbAuthData.name}&` +
-      'api_user=azure_49ceee1fb9bcea054036288b5d477c62@azure.com&' +
-      'api_key=uuwpjgdf'
+      `from=${this.props.auth.authData.email}&` +
+      `fromname=${this.props.auth.authData.name}&` +
+      'api_user=' +
+      'api_key='
     }).then(response => {
       if (response.status >= 400) {
         this.setState({contentAlert: 'Sorry, there was a problem sending your message', name: '', email: '', subject: '', message: ''});
