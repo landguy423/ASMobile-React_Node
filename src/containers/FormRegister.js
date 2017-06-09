@@ -41,6 +41,7 @@ class FormRegister extends React.Component {
 
     };
   }
+
   updateDimensions() {
     let w = window;
     let d = document;
